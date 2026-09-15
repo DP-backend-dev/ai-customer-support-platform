@@ -66,31 +66,37 @@ The landing page includes the public navigation, requestAnimationFrame-batched h
 
 ## Deployment
 
-The repository includes `render.yaml`, which defines a Render Python web service for the API and a Render static site for the React application. Commit and push this directory as the repository root, then choose **New > Blueprint** in Render and connect the repository. Render reads both services from the Blueprint.
+The production frontend is configured for Netlify and the FastAPI backend is configured for Koyeb. Both services deploy from the same GitHub repository.
 
-The API uses `pip install -r requirements.txt` as its build command and `python -m app.run` as its start command. The launcher binds Uvicorn to `0.0.0.0` and reads Render's `PORT`; local runs default to port `8000`. The health check is `/health`. Python dependencies are pinned to exact tested versions in `requirements.txt` so deploys are repeatable.
+### Backend on Koyeb
 
-Set these API environment variables in the Render dashboard when the Blueprint prompts for them:
+Create a Koyeb Web Service from the repository's `main` branch and select the Buildpack builder. Koyeb detects Python from `requirements.txt`, uses Python 3.13 from `.python-version`, and reads the production command from the root `Procfile`: `python -m app.run`. The launcher binds Uvicorn to `0.0.0.0` and reads Koyeb's `PORT`; local runs default to port `8000`. Set the exposed port protocol to HTTP and use `/health` as the health-check path.
+
+Set these backend environment variables in Koyeb. Store `DATABASE_URL`, `SECRET_KEY`, and `GEMINI_API_KEY` as Koyeb Secrets rather than plaintext values:
 
 | Variable | Value to provide |
 | --- | --- |
-| `DATABASE_URL` | The production PostgreSQL connection URL. Use Render Postgres's external or internal URL as appropriate for the service. |
+| `DATABASE_URL` | The existing Neon PostgreSQL connection URL, including SSL parameters required by Neon. |
 | `SECRET_KEY` | A long, cryptographically random production secret. Never reuse the placeholder from `.env.example`. |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | The desired JWT lifetime as a whole number, such as `30`. |
 | `GEMINI_API_KEY` | The production Gemini API key. |
-| `ALLOWED_ORIGINS` | The exact deployed frontend origin, such as `https://ai-support-platform-web.onrender.com`. Separate multiple origins with commas and do not add a trailing slash. |
+| `ALLOWED_ORIGINS` | The exact deployed Netlify frontend origin, such as `https://your-site.netlify.app`. Separate multiple origins with commas and do not add a trailing slash. |
 
-Render supplies `PORT`; do not create it manually. The dashboard CORS middleware reads the comma-separated `ALLOWED_ORIGINS` value at runtime. The public widget configuration and chat routes retain their separate any-origin policy, while authenticated endpoints retain the explicit allowlist.
+Koyeb supplies `PORT`; do not create it manually. The dashboard CORS middleware reads the comma-separated `ALLOWED_ORIGINS` value at runtime. The public widget configuration and chat routes retain their separate any-origin policy, while authenticated endpoints retain the explicit allowlist.
 
-The static frontend uses the committed pnpm lockfile, runs `pnpm install --frozen-lockfile`, and writes the production build to `frontend/dist`. Set `VITE_API_BASE_URL` on the static service to the deployed API origin, for example `https://ai-support-platform-api.onrender.com`, with no trailing slash. Vite embeds this variable at build time, so trigger a new frontend deploy whenever it changes. The Blueprint's `/*` rewrite serves `/index.html` for client-side routes such as `/dashboard`; `frontend/public/_redirects` supplies the equivalent fallback on Netlify. For a manual build, run `npm install` and `npm run build` inside `frontend`.
+### Frontend on Netlify
 
-After the database and API are live, run the demo seed exactly once from a Render Shell attached to the API service:
+Import the same repository into Netlify. The root `netlify.toml` sets `frontend` as the base directory, installs from the committed pnpm lockfile, runs the Vite production build, and publishes `frontend/dist`. It also rewrites every client-side route to `/index.html`; `frontend/public/_redirects` provides the same SPA fallback in the published output.
+
+Set `VITE_API_BASE_URL` in **Project configuration > Environment variables** to the deployed Koyeb origin, for example `https://your-api.koyeb.app`, with no trailing slash. Vite embeds this variable at build time, so redeploy the frontend whenever it changes. Do not place this URL directly in application source.
+
+After Netlify assigns the production URL, set the exact origin as `ALLOWED_ORIGINS` on Koyeb and redeploy the backend. After the database and API are live, seed the demo once from a Koyeb service shell or any trusted terminal configured with the production environment:
 
 ```bash
 python -m app.seed_demo
 ```
 
-The seed is idempotent and may be rerun safely if the first command is interrupted. Confirm the static site's deployed origin is present in `ALLOWED_ORIGINS`, then redeploy the API after changing that setting. The widget embed snippet must point to the deployed API origin because that service serves `/widget.js`.
+The seed is idempotent and may be rerun safely if the first command is interrupted. The widget embed snippet must point to the deployed Koyeb origin because that service serves `/widget.js`.
 
 Keep local `.env` files out of source control. The repository's `.gitignore` excludes backend and frontend environment files while retaining the two `.env.example` templates, which contain placeholders only.
 
