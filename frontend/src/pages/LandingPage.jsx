@@ -129,8 +129,9 @@ function DemoChat() {
       const { data } = await publicApi.post(`/chatbots/${demoId}/chat`, { visitor_identifier: visitorId, message: text })
       setMessages(items => [...items, { role: 'bot', content: data.reply }])
     } catch (err) {
-      setMessages(items => [...items, { role: 'error', content: 'Something went wrong, please try again.' }])
-      setError(errorMessage(err, 'The assistant could not reply.'))
+      const message = errorMessage(err, 'The assistant could not reply. Please try again.')
+      setMessages(items => [...items, { role: 'error', content: message }])
+      setError(message)
     } finally { setSending(false) }
   }
 
