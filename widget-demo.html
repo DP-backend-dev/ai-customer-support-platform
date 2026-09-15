@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Support Widget Test</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #f5f7fb; color: #172033; font-family: system-ui, sans-serif; }
+      main { width: 100%; max-width: 620px; padding: 24px; text-align: center; overflow-wrap: anywhere; }
+      h1 { font-size: clamp(1.75rem, 8vw, 2.5rem); }
+      code { padding: 3px 7px; border-radius: 6px; background: #e8ebf2; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Widget test page</h1>
+      <p>Start the API, replace <code>data-chatbot-id="1"</code> with a chatbot ID from your dashboard, then use the chat bubble.</p>
+    </main>
+    <script src="http://127.0.0.1:8000/widget.js" data-chatbot-id="1"></script>
+  </body>
+</html>
