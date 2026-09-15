@@ -59,7 +59,7 @@
   width: 560px;
   height: 560px;
   right: -95px;
-  top: 10px;
+  top: 135px;
   pointer-events: none;
   opacity: 0.55;
   background-image:
@@ -81,10 +81,10 @@
 }
 
 .hero-glow {
-  width: 420px;
-  height: 420px;
-  right: -110px;
-  top: -90px;
+  width: 480px;
+  height: 480px;
+  right: -105px;
+  top: 85px;
   border-radius: 50%;
   background: radial-gradient(circle at 40% 35%, rgba(90, 70, 220, 0.55), rgba(5, 5, 9, 0) 65%);
 }
@@ -93,7 +93,7 @@
   width: 230px;
   height: 230px;
   right: 20px;
-  top: 140px;
+  top: 250px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 50%;
   animation: hero-ring-turn 24s linear infinite;
@@ -103,7 +103,7 @@
   width: 170px;
   height: 170px;
   right: 60px;
-  top: 150px;
+  top: 255px;
   border-radius: 42% 58% 60% 40% / 48% 42% 58% 52%;
   background: linear-gradient(135deg, #8f6ff0, #4f7fe0);
   box-shadow: 0 30px 80px rgba(79, 127, 224, 0.18);
@@ -142,7 +142,7 @@
   width: 70px;
   height: 70px;
   right: 170px;
-  top: 270px;
+  top: 405px;
   border-radius: 50%;
   background: linear-gradient(135deg, #f07fd0, #7fd4e0);
   box-shadow: 0 18px 45px rgba(240, 127, 208, 0.2);
@@ -153,7 +153,7 @@
   width: 26px;
   height: 26px;
   right: 250px;
-  top: 190px;
+  top: 285px;
   border-radius: 50%;
   background: #7fe0c0;
   box-shadow: 0 0 28px rgba(127, 224, 192, 0.36);
@@ -168,9 +168,9 @@
   animation: hero-twinkle 3.4s ease-in-out infinite;
 }
 
-.hero-dot-one { right: 80px; top: 120px; animation-delay: -0.4s; }
-.hero-dot-two { right: 200px; top: 330px; animation-delay: -2.1s; }
-.hero-dot-three { right: 320px; top: 140px; animation-delay: -1.2s; }
+.hero-dot-one { right: 80px; top: 210px; animation-delay: -0.4s; }
+.hero-dot-two { right: 200px; top: 485px; animation-delay: -2.1s; }
+.hero-dot-three { right: 320px; top: 250px; animation-delay: -1.2s; }
 
 .feature-card {
   --feature-glow: 143, 111, 240;
@@ -236,15 +236,15 @@
 @media (max-width: 767px), (pointer: coarse) {
   .parallax-layer { transform: none !important; transition: none; }
   .hero-copy { max-width: 560px; }
-  .hero-glow { right: -220px; opacity: 0.7; }
-  .hero-ring { right: -100px; top: 170px; opacity: 0.55; }
-  .hero-blob-a { right: -55px; top: 190px; opacity: 0.38; }
-  .hero-blob-b { right: 70px; top: 340px; opacity: 0.35; }
-  .hero-blob-c { right: 165px; top: 175px; opacity: 0.55; }
-  .hero-dot-one { right: 40px; }
-  .hero-dot-two { right: 145px; }
-  .hero-dot-three { right: 240px; }
-  .hero-stage::before { right: -275px; opacity: 0.35; }
+  .hero-glow { right: -240px; top: 155px; opacity: 0.62; }
+  .hero-ring { right: -100px; top: 300px; opacity: 0.48; }
+  .hero-blob-a { right: -55px; top: 305px; opacity: 0.34; }
+  .hero-blob-b { right: 70px; top: 475px; opacity: 0.3; }
+  .hero-blob-c { right: 165px; top: 280px; opacity: 0.5; }
+  .hero-dot-one { right: 40px; top: 245px; }
+  .hero-dot-two { right: 145px; top: 540px; }
+  .hero-dot-three { right: 240px; top: 300px; }
+  .hero-stage::before { right: -275px; top: 190px; opacity: 0.3; }
   .feature-card:hover { box-shadow: 0 0 16px rgba(var(--feature-glow), 0.12); }
   .how-step-card:hover { box-shadow: 0 0 14px rgba(55, 222, 232, 0.08); }
 }

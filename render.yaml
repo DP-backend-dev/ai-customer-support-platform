@@ -18,7 +18,7 @@ services:
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         sync: false
       - key: ALLOWED_ORIGINS
-        sync: false
+        value: https://ai-support-platform-web.onrender.com
 
   - type: web
     name: ai-support-platform-web
