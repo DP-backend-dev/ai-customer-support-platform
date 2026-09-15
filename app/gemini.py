@@ -20,6 +20,7 @@ class GeminiError(Exception):
 def generate_reply(system_context: str, user_message: str) -> str:
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
+        logger.error("Gemini generation failed: GEMINI_API_KEY is not configured")
         raise GeminiError("Gemini API key is not configured")
 
     try:
