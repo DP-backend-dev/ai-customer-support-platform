@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Bot, Braces, Building2, CheckCircle2, Code2, Database, Globe2, MessageCircleMore, Palette, Send } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { errorMessage, publicApi } from '../api'
 import Spinner from '../components/Spinner'
@@ -100,7 +100,7 @@ function DemoChat() {
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
-  const bottomRef = useRef(null)
+  const messagesRef = useRef(null)
 
   useEffect(() => {
     let active = true
@@ -115,8 +115,9 @@ function DemoChat() {
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [])
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  useLayoutEffect(() => {
+    const messagesContainer = messagesRef.current
+    if (messagesContainer) messagesContainer.scrollTop = messagesContainer.scrollHeight
   }, [messages, sending])
 
   async function submit(event) {
@@ -140,8 +141,8 @@ function DemoChat() {
       <span className="grid h-11 w-11 place-items-center overflow-hidden rounded-2xl bg-amber-500/15 text-amber-300">{config?.logo_url ? <img src={config.logo_url} alt="" className="h-full w-full object-cover" /> : <Bot size={21} />}</span>
       <div><h3 className="font-semibold">{config?.name || 'Live demo assistant'}</h3><p className="mt-1 text-xs text-slate-500">Real AI response · Demo business</p></div>
     </header>
-    <div className="h-[420px] overflow-y-auto bg-[#0b0e14] p-5" aria-live="polite">
-      {loading ? <div className="grid h-full place-items-center text-sm text-slate-500"><span className="flex items-center gap-2"><Spinner /> Preparing the demo…</span></div> : error && !demoId ? <div className="grid h-full place-items-center text-center text-sm text-rose-300"><div><Bot className="mx-auto mb-4 opacity-60" /><p>The live demo is currently unavailable.</p><p className="mt-2 text-xs text-slate-600">Please try again shortly.</p></div></div> : <div className="space-y-4">{messages.map((message, index) => <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}><div className={`max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-6 ${message.role === 'user' ? 'bg-violet-600 text-white' : message.role === 'error' ? 'border border-rose-500/20 bg-rose-500/10 text-rose-200' : 'border border-white/[0.08] bg-[#151a23] text-slate-200'}`}>{message.content}</div></div>)}{sending && <div className="flex justify-start"><div className="flex items-center gap-2 rounded-2xl border border-white/[0.08] bg-[#151a23] px-4 py-3 text-sm text-slate-400"><Spinner /> Thinking…</div></div>}<div ref={bottomRef} /></div>}
+    <div ref={messagesRef} className="h-[420px] overflow-y-auto bg-[#0b0e14] p-5 [overflow-anchor:none]" aria-live="polite">
+      {loading ? <div className="grid h-full place-items-center text-sm text-slate-500"><span className="flex items-center gap-2"><Spinner /> Preparing the demo…</span></div> : error && !demoId ? <div className="grid h-full place-items-center text-center text-sm text-rose-300"><div><Bot className="mx-auto mb-4 opacity-60" /><p>The live demo is currently unavailable.</p><p className="mt-2 text-xs text-slate-600">Please try again shortly.</p></div></div> : <div className="space-y-4">{messages.map((message, index) => <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}><div className={`max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-6 ${message.role === 'user' ? 'bg-violet-600 text-white' : message.role === 'error' ? 'border border-rose-500/20 bg-rose-500/10 text-rose-200' : 'border border-white/[0.08] bg-[#151a23] text-slate-200'}`}>{message.content}</div></div>)}{sending && <div className="flex justify-start"><div className="flex items-center gap-2 rounded-2xl border border-white/[0.08] bg-[#151a23] px-4 py-3 text-sm text-slate-400"><Spinner /> Thinking…</div></div>}</div>}
     </div>
     <form onSubmit={submit} className="flex gap-3 border-t border-white/[0.07] p-4"><input className="input" value={input} onChange={event => setInput(event.target.value)} placeholder="Ask about hours, location, or the menu…" disabled={!demoId || sending} /><button className="btn-primary shrink-0" aria-label="Send demo message" disabled={!demoId || sending || !input.trim()}><Send size={17} /><span className="hidden sm:inline">Send</span></button></form>
   </div>

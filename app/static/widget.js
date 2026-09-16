@@ -49,7 +49,7 @@
     ".avatar{display:grid;place-items:center;width:40px;height:40px;flex:none;overflow:hidden;border-radius:12px;background:rgba(255,255,255,.18);font-weight:700}.avatar img{width:100%;height:100%;object-fit:cover}",
     ".title{min-width:0;flex:1}.name{overflow:hidden;font-size:15px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}.status{margin-top:2px;font-size:11px;opacity:.82}",
     ".close{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:9px;background:transparent;color:#fff;cursor:pointer}.close:hover{background:rgba(255,255,255,.13)}",
-    ".messages{flex:1;overflow-y:auto;padding:18px;background:#f7f8fb}.row{display:flex;margin:0 0 12px}.row.user{justify-content:flex-end}.msg{max-width:82%;padding:10px 13px;border-radius:15px;background:#fff;color:#263247;font-size:14px;white-space:pre-wrap;word-break:break-word;box-shadow:0 1px 2px rgba(15,23,42,.07)}",
+    ".messages{flex:1;overflow-y:auto;overflow-anchor:none;padding:18px;background:#f7f8fb}.row{display:flex;margin:0 0 12px}.row.user{justify-content:flex-end}.msg{max-width:82%;padding:10px 13px;border-radius:15px;background:#fff;color:#263247;font-size:14px;white-space:pre-wrap;word-break:break-word;box-shadow:0 1px 2px rgba(15,23,42,.07)}",
     ".row.user .msg{background:var(--aicsp-primary);color:#fff;border-bottom-right-radius:5px}.row.bot .msg{border-bottom-left-radius:5px}.msg.error{color:#9f1239;background:#fff1f2}.typing{color:#64748b;font-style:italic}",
     ".form{display:flex;gap:9px;padding:13px;border-top:1px solid #e8ebf1;background:#fff}.input{min-width:0;flex:1;border:1px solid #d8dde7;border-radius:11px;padding:10px 12px;background:#fff;color:#172033;font:inherit;font-size:14px;outline:none}.input:focus{border-color:var(--aicsp-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--aicsp-primary) 14%,transparent)}",
     ".send{display:grid;place-items:center;width:42px;height:42px;flex:none;border:0;border-radius:11px;background:var(--aicsp-primary);color:#fff;cursor:pointer}.send:disabled,.input:disabled{cursor:not-allowed;opacity:.55}",
@@ -89,11 +89,15 @@
     return row;
   }
 
+  function focusInputWithoutPageScroll() {
+    input.focus({ preventScroll: true });
+  }
+
   function setOpen(open) {
     panel.classList.toggle("open", open);
     bubble.setAttribute("aria-expanded", String(open));
     bubble.setAttribute("aria-label", open ? "Close customer support chat" : "Open customer support chat");
-    if (open && available) window.setTimeout(function () { input.focus(); }, 0);
+    if (open && available) window.setTimeout(focusInputWithoutPageScroll, 0);
   }
 
   bubble.addEventListener("click", function () { setOpen(!panel.classList.contains("open")); });
@@ -135,7 +139,7 @@
       sending = false;
       input.disabled = !available;
       sendButton.disabled = !available;
-      if (available) input.focus();
+      if (available) focusInputWithoutPageScroll();
     });
   });
 
