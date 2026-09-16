@@ -1,4 +1,4 @@
-"""Run the production chat prompt path without creating conversation records."""
+"""Run the production Groq prompt path without creating conversation records."""
 
 import argparse
 import hashlib
@@ -7,11 +7,10 @@ import json
 from sqlalchemy import select
 
 from app.database import SessionLocal
-from app.gemini import (
-    GEMINI_API_VERSION,
-    GEMINI_MODEL,
-    GEMINI_SDK_VERSION,
-    GeminiError,
+from app.groq_client import (
+    GROQ_MODEL,
+    GROQ_SDK_VERSION,
+    GroqGenerationError,
     generate_reply,
 )
 from app.models import Chatbot, KnowledgeEntry
@@ -36,10 +35,9 @@ def diagnose(chatbot_id: int, user_message: str) -> None:
     request_summary = {
         "chatbot_id": chatbot_id,
         "knowledge_entries": len(entries),
-        "model": GEMINI_MODEL,
-        "api_version": GEMINI_API_VERSION,
-        "sdk_version": GEMINI_SDK_VERSION,
-        "request_shape": "system_instruction+text_contents",
+        "model": GROQ_MODEL,
+        "sdk_version": GROQ_SDK_VERSION,
+        "request_shape": "system+user",
         "conversation_history_included": False,
         "context_chars": len(system_context),
         "context_bytes": len(context_bytes),
@@ -50,7 +48,7 @@ def diagnose(chatbot_id: int, user_message: str) -> None:
     print(json.dumps(request_summary, sort_keys=True))
     try:
         reply = generate_reply(system_context, user_message)
-    except GeminiError:
+    except GroqGenerationError:
         print(json.dumps({"generation": "failure"}))
         raise SystemExit(1) from None
     print(json.dumps({"generation": "success", "reply_chars": len(reply)}))
@@ -58,7 +56,7 @@ def diagnose(chatbot_id: int, user_message: str) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Exercise the same Gemini prompt construction used by the public chat route."
+        description="Exercise the same Groq prompt construction used by the public chat route."
     )
     parser.add_argument("--chatbot-id", type=int, default=1)
     parser.add_argument(

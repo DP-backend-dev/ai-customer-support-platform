@@ -1,12 +1,12 @@
 # AI Customer Support Platform — Steps 1–6
 
-This project provides account signup and login, owner-scoped chatbot and knowledge-base management, Gemini-powered chat, conversation history, the authenticated React console, a dependency-free embeddable chat widget, and a public marketing page with a live product demo. Analytics are not included.
+This project provides account signup and login, owner-scoped chatbot and knowledge-base management, Groq-powered chat, conversation history, the authenticated React console, a dependency-free embeddable chat widget, and a public marketing page with a live product demo. Analytics are not included.
 
 ## Run locally
 
 1. Create a PostgreSQL database.
 2. Install Python 3.10+ and run `pip install -r requirements.txt` from this directory.
-3. Copy `.env.example` to `.env`. Set `DATABASE_URL` to your PostgreSQL connection URL, replace `SECRET_KEY` with a long, random secret, set the token lifetime in minutes, provide your `GEMINI_API_KEY`, and list the frontend origins allowed to call the API in `ALLOWED_ORIGINS`.
+3. Copy `.env.example` to `.env`. Set `DATABASE_URL` to your PostgreSQL connection URL, replace `SECRET_KEY` with a long, random secret, set the token lifetime in minutes, provide your `GROQ_API_KEY`, and list the frontend origins allowed to call the API in `ALLOWED_ORIGINS`.
 4. Run `uvicorn app.main:app --reload` from this directory.
 
 The app creates its initial tables on startup. Open `http://127.0.0.1:8000/docs` to try the API. `GET /health` returns `{"status": "ok"}`.
@@ -21,7 +21,7 @@ Chatbot management requires a bearer token: `POST /chatbots`, `GET /chatbots`, `
 
 Knowledge-base management also requires a bearer token: `POST` and `GET /chatbots/{chatbot_id}/knowledge`, plus `PUT` and `DELETE /chatbots/{chatbot_id}/knowledge/{entry_id}`. Questions and answers are required when creating entries.
 
-Visitor chat is public: `POST /chatbots/{chatbot_id}/chat` with `{"visitor_identifier": "visitor-123", "message": "What do you sell?"}`. The response contains `reply` and `conversation_id`. The endpoint reuses a conversation for the same chatbot and visitor identifier, includes all current knowledge entries in the Gemini context, and rolls back its database writes if Gemini fails.
+Visitor chat is public: `POST /chatbots/{chatbot_id}/chat` with `{"visitor_identifier": "visitor-123", "message": "What do you sell?"}`. The response contains `reply` and `conversation_id`. The endpoint reuses a conversation for the same chatbot and visitor identifier, includes all current knowledge entries in the Groq system context, and rolls back its database writes if generation fails.
 
 Authenticated owners can retrieve newest-first conversation history, including messages, from `GET /chatbots/{chatbot_id}/conversations`.
 
@@ -60,7 +60,7 @@ python -m app.seed_demo
 
 The command is safe to rerun. It reuses `demo@internal.local` and the Harbor & Hearth chatbot, then adds only missing seed questions. The generated account password is random and is not printed or stored in the source.
 
-`GET /demo-chatbot-id` returns the seeded chatbot ID. The public landing page at `/` uses that ID to load the normal public config endpoint and submit every visitor message to the normal public chat endpoint. Gemini generation and conversation/message persistence follow the same backend path as a customer's chatbot.
+`GET /demo-chatbot-id` returns the seeded chatbot ID. The public landing page at `/` uses that ID to load the normal public config endpoint and submit every visitor message to the normal public chat endpoint. Groq generation and conversation/message persistence follow the same backend path as a customer's chatbot.
 
 The landing page includes the public navigation, requestAnimationFrame-batched hero parallax, idle gradient motion, a live demo chat, feature cards, and a minimal footer. The authenticated `/dashboard` and chatbot routes remain behind the existing token guard.
 
@@ -72,14 +72,14 @@ The production frontend is configured for Netlify and the FastAPI backend is con
 
 Create a Koyeb Web Service from the repository's `main` branch and select the Buildpack builder. Koyeb detects Python from `requirements.txt`, uses Python 3.13 from `.python-version`, and reads the production command from the root `Procfile`: `python -m app.run`. The launcher binds Uvicorn to `0.0.0.0` and reads Koyeb's `PORT`; local runs default to port `8000`. Set the exposed port protocol to HTTP and use `/health` as the health-check path.
 
-Set these backend environment variables in Koyeb. Store `DATABASE_URL`, `SECRET_KEY`, and `GEMINI_API_KEY` as Koyeb Secrets rather than plaintext values:
+Set these backend environment variables in Koyeb. Store `DATABASE_URL`, `SECRET_KEY`, and `GROQ_API_KEY` as Koyeb Secrets rather than plaintext values:
 
 | Variable | Value to provide |
 | --- | --- |
 | `DATABASE_URL` | The existing Neon PostgreSQL connection URL, including SSL parameters required by Neon. |
 | `SECRET_KEY` | A long, cryptographically random production secret. Never reuse the placeholder from `.env.example`. |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | The desired JWT lifetime as a whole number, such as `30`. |
-| `GEMINI_API_KEY` | The production Gemini API key. |
+| `GROQ_API_KEY` | The production Groq API key. |
 | `ALLOWED_ORIGINS` | The exact deployed Netlify frontend origin, such as `https://your-site.netlify.app`. Separate multiple origins with commas and do not add a trailing slash. |
 
 Koyeb supplies `PORT`; do not create it manually. The dashboard CORS middleware reads the comma-separated `ALLOWED_ORIGINS` value at runtime. The public widget configuration and chat routes retain their separate any-origin policy, while authenticated endpoints retain the explicit allowlist.
@@ -104,16 +104,16 @@ Keep local `.env` files out of source control. The repository's `.gitignore` exc
 
 - [ ] Open the deployed landing page without signing in and confirm every section loads at mobile (375px), tablet (768px), and desktop widths.
 - [ ] Move the pointer over the hero and confirm its parallax responds smoothly; confirm the layout remains usable on a touch device.
-- [ ] Use the landing-page live demo without an account and confirm it returns a real Gemini reply grounded in the seeded knowledge base.
+- [ ] Use the landing-page live demo without an account and confirm it returns a real Groq reply grounded in the seeded knowledge base.
 - [ ] Create a fresh account, sign out, sign back in, and confirm invalid credentials show a clear error.
 - [ ] Create a chatbot and add, edit, and delete knowledge entries.
-- [ ] Send a test-chat message and confirm a real Gemini reply appears.
+- [ ] Send a test-chat message and confirm a real Groq reply appears.
 - [ ] Expand Past Conversations and confirm the test exchange appears in its saved conversation.
 - [ ] Switch the authenticated console between dark and light modes, refresh the page, and confirm the choice persists.
 - [ ] Copy the chatbot's embed code, place it before `</body>` in a separate HTML page, and confirm the branded widget opens and chats successfully.
 - [ ] Log out and confirm protected dashboard, editor, and chatbot URLs redirect to `/login`.
 - [ ] Refresh `/dashboard` and a chatbot detail URL directly on the static host and confirm the React app loads instead of a host 404 page.
-- [ ] Review `.env.example` and `frontend/.env.example`, and verify no `.env` file or real database password, JWT secret, or Gemini key is committed.
+- [ ] Review `.env.example` and `frontend/.env.example`, and verify no `.env` file or real database password, JWT secret, or provider API key is committed.
 - [ ] From an origin absent from `ALLOWED_ORIGINS`, confirm a browser preflight for an authenticated dashboard endpoint is rejected.
 - [ ] From a separate test-page origin, confirm `/chatbots/{id}/public-config` and `POST /chatbots/{id}/chat` return the required CORS headers and work normally.
 - [ ] Temporarily use an invalid chatbot ID in the widget and confirm it displays “Chat is currently unavailable.”

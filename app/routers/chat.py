@@ -1,11 +1,11 @@
-"""Public visitor chat backed by Gemini and a transaction-safe message log."""
+"""Public visitor chat backed by Groq and a transaction-safe message log."""
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.gemini import GeminiError, generate_reply
+from app.groq_client import GroqGenerationError, generate_reply
 from app.models import Chatbot, Conversation, KnowledgeEntry, Message
 from app.schemas import ChatRequest, ChatResponse
 
@@ -68,7 +68,7 @@ def chat(
         reply = generate_reply(system_context, payload.message)
         db.add(Message(conversation_id=conversation.id, role="bot", content=reply))
         db.commit()
-    except GeminiError as exc:
+    except GroqGenerationError as exc:
         db.rollback()
         raise HTTPException(status_code=503, detail="Chat is temporarily unavailable; please try again") from exc
     except Exception as exc:
